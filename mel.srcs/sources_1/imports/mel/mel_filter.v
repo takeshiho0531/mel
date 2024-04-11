@@ -17,7 +17,6 @@ module mel_filter # (
     output reg [6:0] out_group_num // 0-88
 );
     wire [9:0] filter_v; // 0-512
-    wire [1:0] non_zero_num;
     wire [5:0] non_zero_idx1;
     wire [5:0] non_zero_idx2;
     wire signed [26:0] non_zero_data1;
@@ -33,7 +32,6 @@ module mel_filter # (
 
     mel_filter_coef coef(
         .filter_v(filter_v), // 0-512 // i
-        .non_zero_num(non_zero_num), // o
         .non_zero_idx1(non_zero_idx1), // o
         .non_zero_idx2(non_zero_idx2), // o
         .non_zero_data1(non_zero_data1),  // o
@@ -55,91 +53,62 @@ module mel_filter # (
         end
         else begin
             if (di_en & is_first_in) begin
-                if (non_zero_num==0) begin
                     for (i=0; i<64; i=i+1) begin
                         tmp[i] <= 30'b000000000000000000000000000000;
                     end
-                    do_en <= 0;
-                    out_group_num <= in_group_num;
-                end
-                else if (non_zero_num==1) begin
-                    for (i=0; i<64; i=i+1) begin
-                        tmp[i] <= 30'b000000000000000000000000000000;
+
+                    if (scaled1 >= 0) begin
+                        tmp[non_zero_idx1] <= tmp[non_zero_idx1]+scaled1;
+                    end else begin
+                        tmp[non_zero_idx1] <= tmp[non_zero_idx1];
                     end
-                    tmp[non_zero_idx1] <= tmp[non_zero_idx1]+scaled1;
-                    do_en <= 0;
-                    out_group_num <= in_group_num;
-                end
-                else if (non_zero_num==2) begin
-                    for (i=0; i<64; i=i+1) begin
-                        tmp[i] <= 30'b000000000000000000000000000000;
+                    if (scaled2 >= 0) begin
+                        tmp[non_zero_idx2] <= tmp[non_zero_idx2]+scaled2;
+                    end else begin
+                        tmp[non_zero_idx2] <= tmp[non_zero_idx2];
                     end
-                    tmp[non_zero_idx1] <= tmp[non_zero_idx1]+scaled1;
-                    tmp[non_zero_idx2] <= tmp[non_zero_idx2]+scaled2;
+
                     do_en <= 0;
                     out_group_num <= in_group_num;
-                end
-                else begin
-                    for (i=0; i<64; i=i+1) begin
-                        tmp[i] <= 30'b000000000000000000000000000000;
-                    end
-                    do_en <= 0;
-                    out_group_num <= in_group_num;
-                end
             end
             else if (di_en & is_last_in) begin
-                if (non_zero_num==0) begin
                     for (i=0; i<64; i=i+1) begin
                         tmp[i] <= tmp[i];
                     end
-                    do_en <= 1;
-                    out_group_num <= in_group_num;
-                end
-                else if (non_zero_num==1) begin
-                    tmp[non_zero_idx1] <= tmp[non_zero_idx1]+scaled1;
-                    do_en <= 1;
-                    out_group_num <= in_group_num;
-                end
-                else if (non_zero_num==2) begin
-                    tmp[non_zero_idx1] <= tmp[non_zero_idx1]+scaled1;
-                    tmp[non_zero_idx2] <= tmp[non_zero_idx2]+scaled2;
-                    do_en <= 1;
-                    out_group_num <= in_group_num;
-                end
-                else begin
-                    for (i=0; i<64; i=i+1) begin
-                        tmp[i] <= tmp[i];
+
+                    if (scaled1 >= 0) begin
+                        tmp[non_zero_idx1] <= tmp[non_zero_idx1]+scaled1;
+                    end else begin
+                        tmp[non_zero_idx1] <= tmp[non_zero_idx1];
                     end
-                    do_en <= 0;
+                    if (scaled2 >= 0) begin
+                        tmp[non_zero_idx2] <= tmp[non_zero_idx2]+scaled2;
+                    end else begin
+                        tmp[non_zero_idx2] <= tmp[non_zero_idx2];
+                    end
+
+                    do_en <= 1;
                     out_group_num <= in_group_num;
-                end
             end
             else if (di_en) begin
-                if (non_zero_num==0) begin
                     for (i=0; i<64; i=i+1) begin
                         tmp[i] <= tmp[i];
                     end
-                    do_en <= 0;
-                    out_group_num <= in_group_num;
-                end
-                else if (non_zero_num==1) begin
-                    tmp[non_zero_idx1] <= tmp[non_zero_idx1]+scaled1;
-                    do_en <= 0;
-                    out_group_num <= in_group_num;
-                end
-                else if (non_zero_num==2) begin
-                    tmp[non_zero_idx1] <= tmp[non_zero_idx1]+scaled1;
-                    tmp[non_zero_idx2] <= tmp[non_zero_idx2]+scaled2;
-                    do_en <= 0;
-                    out_group_num <= in_group_num;
-                end
-                else begin
-                    for (i=0; i<64; i=i+1) begin
-                        tmp[i] <= tmp[i];
+
+                    if (scaled1 >= 0) begin
+                        tmp[non_zero_idx1] <= tmp[non_zero_idx1]+scaled1;
+                    end else begin
+                        tmp[non_zero_idx1] <= tmp[non_zero_idx1];
                     end
+                    if (scaled2 >= 0) begin
+                        tmp[non_zero_idx2] <= tmp[non_zero_idx2]+scaled2;
+                    end else begin
+                        tmp[non_zero_idx2] <= tmp[non_zero_idx2];
+                    end
+
                     do_en <= 0;
                     out_group_num <= in_group_num;
-                end
+
             end
             else begin
                 for (i=0; i<64; i=i+1) begin
