@@ -58,15 +58,15 @@ module tb_mel_filter;
     ) mel(
         .clk(clk),
         .rst(rst),
-        .in_group_idx(in_group_idx), // 0-512
+        .group_idx_i(in_group_idx), // 0-512
         .data_i(in),
-        .in_group_num(in_group_num), // 0-88
+        .group_num_i(in_group_num), // 0-88
         .di_en(di_en),
-        .is_first_in(is_first_in),
-        .is_last_in(is_last_in),
+        .is_first_i(is_first_in),
+        .is_last_i(is_last_in),
         .data_o(out),
         .do_en(do_en),
-        .out_group_num(out_group_num)
+        .group_num_o(out_group_num)
     );
 
     always @(posedge clk or negedge rst) begin
